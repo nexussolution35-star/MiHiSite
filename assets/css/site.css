@@ -430,7 +430,7 @@ p{margin:0 0 1.1em}
 .quote-submit{width:100%;justify-content:center;padding-top:14px;padding-bottom:14px}
 
 @media(max-width:960px){
-  .hero__grid{grid-template-columns:1fr;gap:clamp(24px,4vh,34px);padding:clamp(80px,11vh,96px) 0 clamp(36px,6vh,56px);justify-items:center}
+  .hero__grid{grid-template-columns:1fr;gap:clamp(24px,4vh,34px);padding:clamp(28px,4.5vh,48px) 0 clamp(36px,6vh,56px);justify-items:center}
   .hero__content{max-width:620px;text-align:center}
   .hero__content .lead{margin-left:auto;margin-right:auto}
   .hero__badges,.hero__marks{justify-content:center}
