@@ -53,7 +53,7 @@
   }, { passive: true });
 
   /* ---- Contact / estimate forms → WhatsApp with e-mail fallback ---- */
-  document.querySelectorAll('form.form-card').forEach(function (form) {
+  document.querySelectorAll('form.form-card, form.quote-form').forEach(function (form) {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var lines = [];
