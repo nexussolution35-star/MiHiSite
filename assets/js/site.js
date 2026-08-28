@@ -146,6 +146,80 @@
     }
   }
 
+  /* ---- Reviews carousel ---- */
+  document.querySelectorAll('.rev-carousel').forEach(function (car) {
+    var track = car.querySelector('.rev-track');
+    var cards = Array.prototype.slice.call(track.querySelectorAll('.rev-card'));
+    var prev = car.querySelector('.rev-prev');
+    var next = car.querySelector('.rev-next');
+    var section = car.closest('.reviews-section') || car.parentNode;
+    var dotsWrap = section.querySelector('.rev-dots');
+    if (!cards.length) return;
+
+    function step() {
+      return cards.length > 1
+        ? (cards[1].offsetLeft - cards[0].offsetLeft)
+        : cards[0].offsetWidth;
+    }
+    function overflowing() {
+      return track.scrollWidth > track.clientWidth + 4;
+    }
+
+    // build dots (one per card)
+    if (dotsWrap) {
+      dotsWrap.innerHTML = '';
+      cards.forEach(function (_, i) {
+        var d = document.createElement('button');
+        d.type = 'button';
+        d.className = 'rev-dot' + (i === 0 ? ' active' : '');
+        d.setAttribute('aria-label', 'Go to review ' + (i + 1));
+        d.addEventListener('click', function () {
+          track.scrollTo({ left: i * step(), behavior: 'smooth' });
+        });
+        dotsWrap.appendChild(d);
+      });
+    }
+
+    function refresh() {
+      var over = overflowing();
+      track.classList.toggle('is-centered', !over);
+      if (prev) prev.hidden = !over;
+      if (next) next.hidden = !over;
+      if (dotsWrap) dotsWrap.hidden = !over;
+      if (!over) return;
+      var active = Math.round(track.scrollLeft / step());
+      if (dotsWrap) {
+        Array.prototype.forEach.call(dotsWrap.children, function (d, i) {
+          d.classList.toggle('active', i === active);
+        });
+      }
+    }
+
+    if (next) next.addEventListener('click', function () {
+      if (track.scrollLeft + track.clientWidth >= track.scrollWidth - 2) {
+        track.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        track.scrollBy({ left: step(), behavior: 'smooth' });
+      }
+    });
+    if (prev) prev.addEventListener('click', function () {
+      if (track.scrollLeft <= 2) {
+        track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' });
+      } else {
+        track.scrollBy({ left: -step(), behavior: 'smooth' });
+      }
+    });
+
+    var raf;
+    track.addEventListener('scroll', function () {
+      window.cancelAnimationFrame(raf);
+      raf = window.requestAnimationFrame(refresh);
+    }, { passive: true });
+    window.addEventListener('resize', refresh, { passive: true });
+    window.addEventListener('load', refresh);
+    refresh();
+  });
+
   /* ---- Lazy-load non-hero images (best-effort) ---- */
   document.querySelectorAll('img').forEach(function (img) {
     if (img.closest('.hero__bg')) return;         // keep hero eager
