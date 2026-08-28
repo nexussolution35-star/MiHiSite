@@ -291,11 +291,6 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.mihi.co.za/faq.html</loc>
-    <lastmod>2026-08-28</lastmod>
-    <priority>0.9</priority>
-  </url>
-  <url>
     <loc>https://www.mihi.co.za/gallery.html</loc>
     <lastmod>2026-08-28</lastmod>
     <priority>0.9</priority>
@@ -307,11 +302,6 @@
   </url>
   <url>
     <loc>https://www.mihi.co.za/privacy.html</loc>
-    <lastmod>2026-08-28</lastmod>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://www.mihi.co.za/reviews.html</loc>
     <lastmod>2026-08-28</lastmod>
     <priority>0.5</priority>
   </url>
