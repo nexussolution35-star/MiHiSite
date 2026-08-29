@@ -38,14 +38,14 @@
     '<figure class="lb-stage"><img alt=""></figure>' +
     '<button class="lb-nav lb-next" aria-label="Next">&#8250;</button>';
   document.addEventListener('DOMContentLoaded', function () { document.body.appendChild(lb); });
-  var lbImg = lb.querySelector('img'), lbIdx = 0;
+  var lbImg = lb.querySelector('img'), lbIdx = 0, lbList = [];
   function lbShow(i) {
-    var imgs = CATS[catIndex][1];
-    lbIdx = (i + imgs.length) % imgs.length;
-    lbImg.src = proj(imgs[lbIdx][0]);
-    lbImg.alt = imgs[lbIdx][1] + ' by Mi-Hi';
+    if (!lbList.length) return;
+    lbIdx = (i + lbList.length) % lbList.length;
+    lbImg.src = proj(lbList[lbIdx][0]);
+    lbImg.alt = lbList[lbIdx][1] + ' by Mi-Hi';
   }
-  function lbOpen(i) { lbShow(i); lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function lbOpen(list, i) { lbList = list; lbShow(i); lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
   function lbClose() { lb.classList.remove('open'); document.body.style.overflow = ''; }
   lb.querySelector('.lb-close').addEventListener('click', lbClose);
   lb.querySelector('.lb-prev').addEventListener('click', function () { lbShow(lbIdx - 1); });
@@ -86,7 +86,7 @@
       var card = li.querySelector('.cf-card');
       li.addEventListener('click', function () {
         if (i !== current) { current = i; layout(); }
-        else { lbOpen(i); }
+        else { lbOpen(CATS[catIndex][1], i); }
       });
       card.addEventListener('mousemove', function (e) {
         if (i !== current) return;
@@ -144,4 +144,53 @@
   window.addEventListener('resize', layout, { passive: true });
 
   buildSlides();
+
+  /* ---- Portfolio filter grid (below the carousel) ---- */
+  (function initGrid() {
+    var filtersEl = document.querySelector('.pf-filters');
+    var gridEl = document.querySelector('.pf-grid');
+    if (!filtersEl || !gridEl) return;
+
+    var ALL = [];
+    CATS.forEach(function (c) { c[1].forEach(function (im) { ALL.push({ n: im[0], title: im[1], cat: c[0] }); }); });
+    var cats = ['All'].concat(CATS.map(function (c) { return c[0]; }));
+    var active = 'All';
+    var zoom = '<svg class="pf-zoom" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>';
+
+    cats.forEach(function (cat) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pf-filter' + (cat === 'All' ? ' active' : '');
+      b.textContent = cat;
+      b.addEventListener('click', function () {
+        active = cat;
+        Array.prototype.forEach.call(filtersEl.children, function (x) { x.classList.toggle('active', x.textContent === cat); });
+        render();
+      });
+      filtersEl.appendChild(b);
+    });
+
+    function currentList() { return active === 'All' ? ALL : ALL.filter(function (x) { return x.cat === active; }); }
+
+    function render() {
+      var list = currentList();
+      gridEl.innerHTML = '';
+      list.forEach(function (item, idx) {
+        var card = document.createElement('article');
+        card.className = 'pf-card';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', 'View ' + item.title);
+        card.innerHTML =
+          '<div class="pf-thumb"><img src="' + proj(item.n) + '" alt="' + item.title + ' by Mi-Hi" loading="lazy" decoding="async">' +
+          '<div class="pf-overlay">' + zoom + '<h3>' + item.title + '</h3><span class="pf-badge">' + item.cat + '</span></div></div>';
+        card.style.animationDelay = (Math.min(idx, 12) * 0.04) + 's';
+        function open() { lbOpen(list.map(function (x) { return [x.n, x.title]; }), idx); }
+        card.addEventListener('click', open);
+        card.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+        gridEl.appendChild(card);
+      });
+    }
+    render();
+  })();
 })();
