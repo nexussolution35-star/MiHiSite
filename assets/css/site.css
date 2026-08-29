@@ -344,8 +344,7 @@ p{margin:0 0 1.1em}
 .rev-card__who small{color:var(--ink-soft)}
 
 /* summary card */
-.rev-card--summary{position:relative;background:var(--dark);border:0;color:#fff;align-items:center;justify-content:center;text-align:center}
-.rev-summary__seal{position:absolute;top:14px;right:14px;width:clamp(58px,8vw,82px);height:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
+.rev-card--summary{background:var(--dark);border:0;color:#fff;align-items:center;justify-content:center;text-align:center}
 .rev-summary__score{font-family:var(--font-display);font-weight:800;font-size:56px;line-height:1;color:var(--accent)}
 .rev-summary__stars{color:var(--accent);justify-content:center;margin:10px 0}
 .rev-summary__label{color:#eaddcb;margin:0 0 14px}
