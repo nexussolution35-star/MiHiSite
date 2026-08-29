@@ -233,4 +233,45 @@
       el.innerHTML = el.innerHTML.replace(/©\s*\d{4}/, '© ' + new Date().getFullYear());
     });
   });
+
+  /* ---- Count-up stats when scrolled into view (once) ---- */
+  (function () {
+    var section = document.querySelector('.stats');
+    if (!section) return;
+    var items = Array.prototype.slice.call(section.querySelectorAll('.stat b'))
+      .map(function (el) {
+        var m = /^(\D*)([\d.,]+)(\D*)$/.exec(el.textContent.trim());
+        if (!m) return null;
+        return { el: el, pre: m[1], suf: m[3], raw: el.textContent.trim(), target: parseFloat(m[2].replace(/,/g, '')) };
+      }).filter(Boolean);
+    if (!items.length) return;
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) return; // leave final values as-is
+
+    items.forEach(function (it) { it.el.textContent = it.pre + '0' + it.suf; });
+
+    function animate(it) {
+      var dur = 1600, start = null;
+      function frame(t) {
+        if (start === null) start = t;
+        var p = Math.min(1, (t - start) / dur);
+        var eased = 1 - Math.pow(1 - p, 3);            // easeOutCubic
+        if (p < 1) {
+          it.el.textContent = it.pre + Math.round(it.target * eased) + it.suf;
+          requestAnimationFrame(frame);
+        } else {
+          it.el.textContent = it.raw;                  // exact original value
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { io.disconnect(); items.forEach(animate); }
+      });
+    }, { threshold: 0.4 });
+    io.observe(section);
+  })();
 })();
