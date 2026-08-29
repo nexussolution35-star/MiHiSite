@@ -465,7 +465,7 @@ p{margin:0 0 1.1em}
   will-change:transform,opacity;
 }
 .cf-card{
-  position:relative;width:100%;height:100%;border-radius:14px;overflow:hidden;
+  position:relative;width:100%;height:100%;border-radius:var(--radius-card);overflow:hidden;
   background:#1d1f2f;box-shadow:0 30px 70px -28px rgba(20,15,10,.7);
   transition:transform .15s ease-out;transform-style:preserve-3d;
 }
@@ -520,7 +520,7 @@ p{margin:0 0 1.1em}
 @media(max-width:520px){.pf-grid{grid-template-columns:1fr}}
 
 .pf-card{
-  cursor:pointer;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  cursor:pointer;border-radius:var(--radius-card);overflow:hidden;border:1px solid var(--line);
   background:var(--surface);animation:pf-in .4s ease both;transition:box-shadow .25s ease,border-color .25s ease;
 }
 .pf-card:hover{box-shadow:var(--shadow);border-color:var(--accent)}
