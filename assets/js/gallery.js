@@ -77,7 +77,7 @@
       li.className = 'cf-slide';
       li.innerHTML =
         '<div class="cf-card"><img src="' + proj(im[0]) + '" alt="' + im[1] + ' by Mi-Hi" loading="lazy" decoding="async">' +
-        '<div class="cf-cap"><h3>' + cat + '</h3><span class="cf-view">View project</span></div></div>';
+        '<div class="cf-cap"><h3>' + cat + '</h3></div></div>';
       var card = li.querySelector('.cf-card');
       li.addEventListener('click', function () {
         if (i !== current) { current = i; layout(); }
