@@ -45,8 +45,8 @@
     lbImg.src = proj(lbList[lbIdx][0]);
     lbImg.alt = lbList[lbIdx][1] + ' by Mi-Hi';
   }
-  function lbOpen(list, i) { lbList = list; lbShow(i); lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
-  function lbClose() { lb.classList.remove('open'); document.body.style.overflow = ''; }
+  function lbOpen(list, i) { stopAuto(); lbList = list; lbShow(i); lb.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function lbClose() { lb.classList.remove('open'); document.body.style.overflow = ''; schedule(); }
   lb.querySelector('.lb-close').addEventListener('click', lbClose);
   lb.querySelector('.lb-prev').addEventListener('click', function () { lbShow(lbIdx - 1); });
   lb.querySelector('.lb-next').addEventListener('click', function () { lbShow(lbIdx + 1); });
@@ -58,21 +58,16 @@
     else if (e.key === 'ArrowRight') lbShow(lbIdx + 1);
   });
 
-  /* ---- category tabs ---- */
+  /* ---- category labels (display-only, not clickable) ---- */
   CATS.forEach(function (c, ci) {
-    var b = document.createElement('button');
-    b.type = 'button';
+    var b = document.createElement('span');
     b.className = 'cat-tab' + (ci === 0 ? ' active' : '');
     b.textContent = c[0];
-    b.setAttribute('role', 'tab');
-    b.addEventListener('click', function () {
-      if (ci === catIndex) return;
-      catIndex = ci; current = 0;
-      Array.prototype.forEach.call(tabsEl.children, function (t, ti) { t.classList.toggle('active', ti === ci); });
-      buildSlides();
-    });
     tabsEl.appendChild(b);
   });
+  function setActiveTab(ci) {
+    Array.prototype.forEach.call(tabsEl.children, function (t, ti) { t.classList.toggle('active', ti === ci); });
+  }
 
   function buildSlides() {
     var imgs = CATS[catIndex][1], cat = CATS[catIndex][0];
@@ -101,11 +96,12 @@
       var d = document.createElement('button');
       d.type = 'button'; d.className = 'cf-dot';
       d.setAttribute('aria-label', 'Go to project ' + (i + 1));
-      d.addEventListener('click', function () { current = i; layout(); });
+      d.addEventListener('click', function () { current = i; layout(); schedule(); });
       dotsEl.appendChild(d);
     });
-    var single = imgs.length <= 1;
-    prevBtn.hidden = single; nextBtn.hidden = single; dotsEl.hidden = single;
+    // arrows always available (they cross categories); dots only within a category
+    prevBtn.hidden = false; nextBtn.hidden = false;
+    dotsEl.hidden = imgs.length <= 1;
     layout();
   }
 
@@ -129,21 +125,44 @@
     Array.prototype.forEach.call(dotsEl.children, function (d, i) { d.classList.toggle('active', i === current); });
   }
 
-  function go(dir) {
-    var n = slides.length; if (!n) return;
-    current = Math.max(0, Math.min(n - 1, current + dir));
-    layout();
+  // move to another category (atEnd = land on its last slide)
+  function gotoCat(ci, atEnd) {
+    catIndex = ((ci % CATS.length) + CATS.length) % CATS.length;
+    setActiveTab(catIndex);
+    current = atEnd ? Math.max(0, CATS[catIndex][1].length - 1) : 0;
+    buildSlides();
   }
-  prevBtn.addEventListener('click', function () { go(-1); });
-  nextBtn.addEventListener('click', function () { go(1); });
+  // step one image; when past the end of a category, roll into the next one
+  function step(dir) {
+    var ni = current + dir;
+    if (ni >= 0 && ni < slides.length) { current = ni; layout(); }
+    else { gotoCat(catIndex + dir, dir < 0); }
+  }
+
+  /* ---- auto-advance to the right through every category/image ---- */
+  var timer = null, AUTO = 3500;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function schedule() { if (reduce) return; clearTimeout(timer); timer = setTimeout(autoNext, AUTO); }
+  function stopAuto() { clearTimeout(timer); }
+  function autoNext() { step(1); schedule(); }
+  function manual(dir) { step(dir); schedule(); }
+
+  prevBtn.addEventListener('click', function () { manual(-1); });
+  nextBtn.addEventListener('click', function () { manual(1); });
   document.addEventListener('keydown', function (e) {
     if (lb.classList.contains('open')) return;
-    if (e.key === 'ArrowLeft') go(-1);
-    else if (e.key === 'ArrowRight') go(1);
+    if (e.key === 'ArrowLeft') manual(-1);
+    else if (e.key === 'ArrowRight') manual(1);
   });
+  var coverflowEl = document.querySelector('.coverflow');
+  if (coverflowEl) {
+    coverflowEl.addEventListener('mouseenter', stopAuto);   // pause while inspecting
+    coverflowEl.addEventListener('mouseleave', schedule);
+  }
   window.addEventListener('resize', layout, { passive: true });
 
   buildSlides();
+  schedule();
 
   /* ---- Portfolio filter grid (below the carousel) ---- */
   (function initGrid() {
